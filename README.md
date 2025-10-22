@@ -75,7 +75,7 @@ Esta función redimensiona imágenes desde `src/img` a resoluciones óptimas par
 Instala la dependencia:
 
 ```
-npm install sharp
+npm install --save-dev sharp
 ```
 ### 📁 Estructura esperada
 ```
