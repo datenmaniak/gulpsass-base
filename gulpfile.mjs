@@ -129,40 +129,12 @@ function generateJSmini() {
 //     .pipe(dest('build/img'));
 // }
 
-function resizeImagesForWeb() {
-  ensureFolder('src/img', 'carpeta de imágenes');
 
-  const sizes = [
-    { width: 480, suffix: '-sm' },
-    { width: 768, suffix: '-md' },
-    { width: 1280, suffix: '-lg' }
-  ];
-
-  const tasks = sizes.map(size => {
-    return src(paths.images)
-      .pipe(newer(`build/img`))
-      .pipe(imageResize({
-        width: size.width,
-        upscale: false,
-        imageMagick: true
-      }))
-      .pipe(rename({ suffix: size.suffix }))
-      .on('error', err => {
-        console.error(`❌ Error al redimensionar a ${size.width}px:`, err.message);
-      })
-      .pipe(dest('build/img'));
-  });
-
-  return Promise.all(tasks.map(task => new Promise((resolve, reject) => {
-    task.on('end', resolve);
-    task.on('error', reject);
-  })));
-}
 
 //  Esta función fue ajustada para generar solo una imagen, con un ancho de 480px.
 //  sin extensiones agregadas (-sm, -md, -lg)
 // se preserva el nombre original del archivo
-function resizeImagesWithSharp(done) {
+function resizeImagesForWebWithSharp(done) {
   ensureFolder('src/img', 'carpeta de imágenes');
   const inputDir = 'src/img';
   const outputDir = 'build/img';
@@ -210,11 +182,11 @@ function watchFiles() {
   watch(paths.scss, buildStyles);
   watch(paths.js, generateJS);
   // watch(paths.images, optimizeImages);
-  watch(paths.images, resizeImagesWithSharp);
+  watch(paths.images, resizeImagesForWebWithSharp);
   // watch(paths.images, generateImagesWebp);
 }
 
 console.log('🚀 Iniciando build...');
 export default parallel(cleanBuild, buildStyles, 
   buildStylesMini, generateJS, generateJSmini, 
-  resizeImagesWithSharp, watchFiles);
+  resizeImagesForWebWithSharp, watchFiles);

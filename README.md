@@ -35,16 +35,22 @@ build/
 
 ## 🧪 ¿Qué tareas ejecuta Gulp?
 
-| Tarea               | Descripción                                                                 |
-|---------------------|------------------------------------------------------------------------------|
-| `buildStyles`       | Compila archivos SCSS a CSS con sourcemaps para desarrollo.                 |
-| `generateCssmini`   | Minifica el CSS usando PostCSS con Autoprefixer y cssnano.                  |
-| `minificarCSS`      | Aplica `gulp-clean-css` sobre el CSS generado para producción adicional.    |
-| `generateJS`        | Concatena y minifica los scripts JS en `bundle.min.js` con sourcemaps.      |
-| `optimizeImages`    | Optimiza imágenes desde `src/img` y las guarda en `build/img`.              |
-| `generateImagesWebp`| Convierte imágenes a formato WebP y las guarda en `build/img`.              |
+| Tarea                 | Descripción                                                                 |
+|-----------------------|------------------------------------------------------------------------------|
+| `buildStyles`         | Compila archivos SCSS a CSS con sourcemaps para desarrollo.                 |
+| `buildStylesMini`     | Minifica el CSS usando PostCSS con Autoprefixer y cssnano.                  |
+| `generateJSmini`             | Concatena y minifica los scripts JS en `bundle.min.js` con sourcemaps.      |
+| `resizeImagesForWebWithSharp`  | Optimiza imágenes desde `src/img` y las guarda en `build/img`.              |
 | `cleanBuild`        | Limpia la carpeta `build/css` antes de compilar nuevos estilos.             |
 | `watchFiles`        | Observa cambios en `.scss`, `.js` e imágenes para recompilar automáticamente.|
+
+### Removed: 
+| Tarea                 | Descripción                                                                 |
+|-----------------------|------------------------------------------------------------------------------|
+| `optimizeImages`         | Optimiza imágenes desde `src/img` y las guarda en `build/img`.              |
+| `generateImagesWebp`| Convierte imágenes a formato WebP y las guarda en `build/img`.              |
+| `minificarCSS`        | Aplica `gulp-clean-css` sobre el CSS generado para producción adicional.    |
+
 
 ## 🖼️ Compatibilidad de imágenes
 
