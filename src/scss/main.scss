@@ -1,0 +1,40 @@
+@use 'variables' as vars;
+@use 'mixins' as mix;
+
+body {
+  font-family: vars.$font-base;
+  background-color: vars.$color-bg;
+  color: vars.$color-text;
+  margin: 0;
+  padding: 0;
+}
+
+.hero {
+  background-color: vars.$color-primary;
+  color: vars.$color-light;
+  padding: 2rem;
+  text-align: center;
+
+  .tagline {
+    font-size: 1.2rem;
+    opacity: 0.8;
+  }
+}
+
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.card {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+
+  @include mix.respond-to(small) {
+    padding: 1rem;
+  }
+}

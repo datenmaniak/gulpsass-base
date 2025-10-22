@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Gulp + Sass + JS + Imágenes</title>
+  <link rel="stylesheet" href="build/css/main.css" />
+</head>
+<body>
+  <!-- La banda verde será insertada dinámicamente por JS -->
+
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Entorno Gulp + Sass + JS</h1>
+        <p class="tagline">Compilación, minificación y conversión WebP</p>
+      </div>
+      <div class="hero-logo">
+        <img src="build/img/logo.png" alt="Logo optimizado" width="120" />
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Prueba de estilos y scripts</h2>
+      <p>Este bloque verifica que Sass se compila y JS se ejecuta correctamente.</p>
+      <p>Si ves una banda verde arriba, significa que <code>bundle.min.js</code> fue generado y está funcionando.</p>
+    </section>
+
+    <section class="image-test">
+      <picture>
+        <source srcset="build/img/central.webp" type="image/webp" />
+        <source srcset="build/img/central.jpg" type="image/jpeg" />
+        <img src="build/img/central.png" alt="Imagen central de prueba" width="300" />
+      </picture>
+      <figcaption>
+        Esta imagen se adapta al formato soportado por tu navegador: <strong>WebP</strong>, <strong>JPG</strong> o <strong>PNG</strong>.
+      </figcaption>
+    </section>
+  </main>
+
+  <script src="build/js/bundle.min.js"></script>
+</body>
+</html>
