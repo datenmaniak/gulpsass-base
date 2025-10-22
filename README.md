@@ -58,9 +58,11 @@ Ejemplo de cómo usar las imágenes convertidas.
 
 
 ```
+##  Pendiente: corregir la conversión de imágenes
 
 
-```
+
+```|
 
 ```
 
