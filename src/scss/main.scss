@@ -37,4 +37,13 @@ body {
   @include mix.respond-to(small) {
     padding: 1rem;
   }
+
+
+.image-test picture img {
+  width: 20%;
+  display: block;
+  margin-inline: auto;
+}
+
+
 }

@@ -153,20 +153,55 @@ export default parallel(
 );
 
 ```
+
+# 🖼️ convertImagesToWebp() — Conversión moderna a WebP con Sharp
+
+Esta función convierte imágenes desde `src/img` al formato WebP, generando archivos optimizados en `build/img`. Utiliza la librería `sharp`, evitando dependencias externas como ImageMagick y asegurando compatibilidad con navegadores modernos.
+
+---
+
+## ✅ Requisitos
+
+Instala la dependencia:
+
+```bash
+npm install sharp
+```
+
+## 📁 Estructura esperada
+```
+src/img/
+├── logo.png
+├── central.jpg
+build/img/
+├── logo.webp
+├── central.webp
+```
+
+
+
+
+
+
+
+
+
+
+
+
+# 🧑‍💻 Autor
+Datenmaniak — IT Freelancer, diseñador web modular, creador del ecosistema Violet Pulse.
+
+
+
 > ℹ️ **Nota:** Para más información sobre las dependencias necesarias, consulta el archivo `package.json`. Allí se definen todos los paquetes requeridos para ejecutar esta función, incluyendo `sharp` y otras utilidades del entorno Gulp. Al ejecutar `npm install`, se instalarán automáticamente.
 
 > 🛠️ **Nota técnica:** Si deseas generar únicamente una versión redimensionada a 480px y conservar el nombre original del archivo (sin sufijos como `-sm`, `-md`, `-lg`), puedes ajustar la función eliminando el bucle de tamaños y modificando la línea `.toFile()` para que use directamente el nombre base:
->
-> ```js
-> sharp(`${inputDir}/${file}`)
->   .resize({ width: 480 })
->   .toFile(`${outputDir}/${base}${ext}`)
-> ```
->
-> Esto sobrescribirá cualquier archivo existente con el mismo nombre en `build/img`, por lo que se recomienda usar una carpeta dedicada si deseas conservar el original.
 
-
-```|
-
+```js
+  sharp(`${inputDir}/${file}`)
+   .resize({ width: 480 })
+   .toFile(`${outputDir}/${base}${ext}`)
 ```
 
+> Esto sobrescribirá cualquier archivo existente con el mismo nombre en `build/img`, por lo que se recomienda usar una carpeta dedicada si deseas conservar el original.

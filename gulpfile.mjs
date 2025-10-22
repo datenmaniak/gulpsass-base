@@ -71,7 +71,7 @@ function buildStylesMini() {
     .pipe(sourcemaps.init())
     .pipe(sass()
     .on('error', err => { // function compile de Dart Sass
-      console.error('❌ Error al compilar SCSS (generateCssmini):', err.message);
+      console.error('[buildStylesMini] ❌ Error al compilar SCSS ', err.message);
     }))
     .pipe(postcss([autoprefixer(), cssnano()]))
     .pipe(rename({ suffix: '.min' }))
@@ -86,7 +86,7 @@ function generateJS() {
   // .pipe(concat('bundle.js'))
   .pipe(terser())
   .on('error', err => {
-    console.error('❌ Error al generar los estilos:', err.message);
+    console.error('[generateJS] ❌ Error al generar los estilos:', err.message);
   })
   // .pipe(rename({ suffix: '.min' })) // renombrar antes de escribir sourcemaps
   // .pipe(sourcemaps.write('.'))
@@ -100,7 +100,7 @@ function generateJSmini() {
   .pipe(concat('bundle.js'))
   .pipe(terser())
   .on('error', err => {
-    console.error('❌ Error al minificar JS', err.message);
+    console.error('[generateJSmini] ❌ Error al minificar JS', err.message);
   })
   .pipe(rename({ suffix: '.min' })) // renombrar antes de escribir sourcemaps
   .pipe(sourcemaps.write('.'))
@@ -177,16 +177,51 @@ function resizeImagesForWebWithSharp(done) {
   done();
 }
 
+function convertImagesToWebp(done) {
+  const inputDir = 'src/img';
+  const outputDir = 'build/img';
+
+  if (!fs.existsSync(inputDir)) {
+    console.warn(`⚠️ La carpeta "${inputDir}" no existe.`);
+    return done();
+  }
+
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  fs.readdirSync(inputDir).forEach(file => {
+    const ext = path.extname(file).toLowerCase();
+    const base = path.basename(file, ext);
+
+    if (['.jpg', '.jpeg', '.png'].includes(ext)) {
+      sharp(`${inputDir}/${file}`)
+         .resize({ width: 480 })
+        .toFormat('webp')
+        .toFile(`${outputDir}/${base}.webp`)
+        .then(() => {
+          console.log(`✅ ${file} → ${base}.webp`);
+        })
+        .catch(err => {
+          console.error(`❌ Error al convertir ${file} a WebP:`, err.message);
+        });
+    }
+  });
+
+  done();
+}
+
+
 
 function watchFiles() {
   watch(paths.scss, buildStyles);
   watch(paths.js, generateJS);
   // watch(paths.images, optimizeImages);
   watch(paths.images, resizeImagesForWebWithSharp);
-  // watch(paths.images, generateImagesWebp);
+  watch(paths.images, convertImagesToWebp);
 }
 
 console.log('🚀 Iniciando build...');
 export default parallel(cleanBuild, buildStyles, 
   buildStylesMini, generateJS, generateJSmini, 
-  resizeImagesForWebWithSharp, watchFiles);
+  resizeImagesForWebWithSharp, convertImagesToWebp, watchFiles);
