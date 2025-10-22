@@ -1,4 +1,4 @@
-# 🌐 Violet Pulse Starter — Entorno Gulp + Sass + JS + Imágenes
+# 🌐 Starter — Entorno Gulp + Sass + JS + Imágenes
 
 Este proyecto es un entorno de desarrollo modular que compila Sass, minifica CSS/JS, optimiza imágenes y genera versiones WebP. Ideal para prototipos escalables, branding personalizado y automatización con Gulp.
 
@@ -58,8 +58,106 @@ Ejemplo de cómo usar las imágenes convertidas.
 
 
 ```
-##  Pendiente: corregir la conversión de imágenes
+# 🖼️ resizeImagesWithSharp() — Redimensionamiento moderno con Sharp
 
+Esta función redimensiona imágenes desde `src/img` a resoluciones óptimas para la web (480px, 768px, 1280px) usando la librería `sharp`, sin depender de ImageMagick ni plugins obsoletos. Los archivos generados se guardan en `build/img`.
+
+---
+
+## ✅ Requisitos
+
+Instala la dependencia:
+
+```
+npm install sharp
+```
+### 📁 Estructura esperada
+```
+src/img/            <--- source 
+├── logo.png
+├── central.jpg
+build/img/          <--- destination 
+├── logo-sm.png
+├── logo-md.png
+├── logo-lg.png
+├── central-sm.jpg
+├── central-md.jpg
+├── central-lg.jpg
+```
+### 🧩 Código de la función
+
+```
+import sharp from 'sharp';
+import fs from 'fs';
+import path from 'path';
+
+function resizeImagesWithSharp(done) {
+  const inputDir = 'src/img';
+  const outputDir = 'build/img';
+  const sizes = [
+    { width: 480, suffix: '-sm' },
+    { width: 768, suffix: '-md' },
+    { width: 1280, suffix: '-lg' }
+  ];
+
+  if (!fs.existsSync(inputDir)) {
+    console.warn(`⚠️ La carpeta "${inputDir}" no existe.`);
+    return done();
+  }
+
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  fs.readdirSync(inputDir).forEach(file => {
+    const ext = path.extname(file).toLowerCase();
+    const base = path.basename(file, ext);
+
+    if (['.jpg', '.jpeg', '.png'].includes(ext)) {
+      sizes.forEach(size => {
+        sharp(`${inputDir}/${file}`)
+          .resize({ width: size.width })
+          .toFile(`${outputDir}/${base}${size.suffix}${ext}`)
+          .then(() => {
+            console.log(`✅ ${file} → ${base}${size.suffix}${ext}`);
+          })
+          .catch(err => {
+            console.error(`❌ Error al redimensionar ${file}:`, err.message);
+          });
+      });
+    }
+  });
+
+  done();
+}
+
+```
+### 🧪 Integración en Gulp
+Agrega la función a tu flujo principal:
+
+```
+export default parallel(
+  cleanBuild, 
+  buildStyles, 
+  buildStylesMini, 
+  generateJS, 
+  generateJSmini, 
+  resizeImagesWithSharp,
+   watchFiles
+);
+
+```
+> ℹ️ **Nota:** Para más información sobre las dependencias necesarias, consulta el archivo `package.json`. Allí se definen todos los paquetes requeridos para ejecutar esta función, incluyendo `sharp` y otras utilidades del entorno Gulp. Al ejecutar `npm install`, se instalarán automáticamente.
+
+> 🛠️ **Nota técnica:** Si deseas generar únicamente una versión redimensionada a 480px y conservar el nombre original del archivo (sin sufijos como `-sm`, `-md`, `-lg`), puedes ajustar la función eliminando el bucle de tamaños y modificando la línea `.toFile()` para que use directamente el nombre base:
+>
+> ```js
+> sharp(`${inputDir}/${file}`)
+>   .resize({ width: 480 })
+>   .toFile(`${outputDir}/${base}${ext}`)
+> ```
+>
+> Esto sobrescribirá cualquier archivo existente con el mismo nombre en `build/img`, por lo que se recomienda usar una carpeta dedicada si deseas conservar el original.
 
 
 ```|

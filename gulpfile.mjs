@@ -15,14 +15,15 @@ import sourcemaps from 'gulp-sourcemaps';
 import concat from 'gulp-concat';
 import terser from 'gulp-terser';
 import rename from 'gulp-rename';
-import imagemin from 'gulp-imagemin';
+// import imagemin from 'gulp-imagemin';
 import newer from 'gulp-newer';
 // import webp from 'gulp-webp';
-import imageminWebp from 'imagemin-webp';
+// import imageminWebp from 'imagemin-webp';
 import fs from 'fs';
 import path from 'path';
 import {deleteAsync} from 'del';
-
+import imageResize from 'gulp-image-resize';
+import sharp from 'sharp';
 
 const paths = {
   scss: 'src/scss/**/*.scss',
@@ -106,36 +107,114 @@ function generateJSmini() {
   .pipe(dest('build/js'));
 }
 
-function optimizeImages() {
+// function optimizeImages() {
+//   ensureFolder('src/img', 'carpeta de imágenes');
+//   return src(paths.images)
+//     .pipe(newer('build/img'))
+//     .pipe(imagemin({ optimizationLevel: 3 }))
+//     .on('error', err => {
+//       console.error('❌ Error al optimizar imágenes:', err.message);
+//     })
+//     .pipe(dest('build/img'));
+// }
+
+// function generateImagesWebp() {
+//   ensureFolder('src/img', 'carpeta de imágenes');
+//   return src(paths.images)
+//     // .pipe(webp())
+//     .pipe(imagemin({quality:50}))
+//     .on('error', err => {
+//       console.error('❌ Error al generar imágenes WebP:', err.message);
+//     })
+//     .pipe(dest('build/img'));
+// }
+
+function resizeImagesForWeb() {
   ensureFolder('src/img', 'carpeta de imágenes');
-  return src(paths.images)
-    .pipe(newer('build/img'))
-    .pipe(imagemin({ optimizationLevel: 3 }))
-    .on('error', err => {
-      console.error('❌ Error al optimizar imágenes:', err.message);
-    })
-    .pipe(dest('build/img'));
+
+  const sizes = [
+    { width: 480, suffix: '-sm' },
+    { width: 768, suffix: '-md' },
+    { width: 1280, suffix: '-lg' }
+  ];
+
+  const tasks = sizes.map(size => {
+    return src(paths.images)
+      .pipe(newer(`build/img`))
+      .pipe(imageResize({
+        width: size.width,
+        upscale: false,
+        imageMagick: true
+      }))
+      .pipe(rename({ suffix: size.suffix }))
+      .on('error', err => {
+        console.error(`❌ Error al redimensionar a ${size.width}px:`, err.message);
+      })
+      .pipe(dest('build/img'));
+  });
+
+  return Promise.all(tasks.map(task => new Promise((resolve, reject) => {
+    task.on('end', resolve);
+    task.on('error', reject);
+  })));
 }
 
-function generateImagesWebp() {
+//  Esta función fue ajustada para generar solo una imagen, con un ancho de 480px.
+//  sin extensiones agregadas (-sm, -md, -lg)
+// se preserva el nombre original del archivo
+function resizeImagesWithSharp(done) {
   ensureFolder('src/img', 'carpeta de imágenes');
-  return src(paths.images)
-    // .pipe(webp())
-    .pipe(imagemin({quality:50}))
-    .on('error', err => {
-      console.error('❌ Error al generar imágenes WebP:', err.message);
-    })
-    .pipe(dest('build/img'));
+  const inputDir = 'src/img';
+  const outputDir = 'build/img';
+  const sizes = [
+    { width: 480, suffix: '-sm' },
+    { width: 768, suffix: '-md' },
+    { width: 1280, suffix: '-lg' }
+  ];
+
+  if (!fs.existsSync(inputDir)) {
+    console.warn(`⚠️ La carpeta "${inputDir}" no existe.`);
+    return done();
+  }
+
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  fs.readdirSync(inputDir).forEach(file => {
+    const ext = path.extname(file).toLowerCase();
+    const base = path.basename(file, ext);
+
+    if (['.jpg', '.jpeg', '.png'].includes(ext)) {
+      sizes.forEach(size => {
+        sharp(`${inputDir}/${file}`)
+          // .resize({ width: size.width })
+          .resize({ width: 480 })
+          // .toFile(`${outputDir}/${base}${size.suffix}${ext}`)
+          .toFile(`${outputDir}/${base}${ext}`)
+          .then(() => {
+            console.log(`✅ ${file} → ${base}${size.suffix}${ext}`);
+          })
+          .catch(err => {
+            console.error(`❌ Error al redimensionar ${file}:`, err.message);
+          });
+      });
+    }
+  });
+
+  done();
 }
+
 
 function watchFiles() {
   watch(paths.scss, buildStyles);
   watch(paths.js, generateJS);
-  watch(paths.images, optimizeImages);
-  watch(paths.images, generateImagesWebp);
+  // watch(paths.images, optimizeImages);
+  watch(paths.images, resizeImagesWithSharp);
+  // watch(paths.images, generateImagesWebp);
 }
 
 console.log('🚀 Iniciando build...');
 export default parallel(cleanBuild, buildStyles, 
   buildStylesMini, generateJS, generateJSmini, 
-  optimizeImages, generateImagesWebp, watchFiles);
+  resizeImagesWithSharp, watchFiles);
