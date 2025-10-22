@@ -1,7 +1,7 @@
 // gulpfile.mjs
 'use strict';
 
-import { src, dest, watch, parallel } from 'gulp';
+import { src, dest, watch, series, parallel } from 'gulp';
 
 import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
@@ -21,15 +21,17 @@ import newer from 'gulp-newer';
 // import imageminWebp from 'imagemin-webp';
 import fs from 'fs';
 import path from 'path';
-import {deleteAsync} from 'del';
 import imageResize from 'gulp-image-resize';
 import sharp from 'sharp';
+
+import {deleteAsync} from 'del';
 
 const paths = {
   scss: 'src/scss/**/*.scss',
   js: 'src/js/**/*.js',
   images: 'src/img/**/*'
 };
+
 
 // ✅ Función reutilizable para verificar y crear carpetas
 function ensureFolder(folderPath, label = 'carpeta') {
@@ -47,8 +49,12 @@ function ensureFolder(folderPath, label = 'carpeta') {
 }
 
 // 🧼 Limpia la carpeta build/css
-export function cleanBuild() {
+export function cleanCSS() {
   return deleteAsync(['build/css/*']);
+}
+
+export function cleanJS() {
+    return deleteAsync(['build/js/**/*.{js,map}']);
 }
 
 function buildStyles() {
@@ -80,20 +86,20 @@ function buildStylesMini() {
 }
 
 function generateJS() {
+  // crear JS normal, legible para usuarios
   ensureFolder('src/js', 'carpeta de scripts JS');
   return src(paths.js)
   .pipe(sourcemaps.init())
-  // .pipe(concat('bundle.js'))
-  .pipe(terser())
+  .pipe(terser({ format: { beautify: true } }))
+  .pipe(concat('bundle.js')) // nombre legible sin .min
   .on('error', err => {
     console.error('[generateJS] ❌ Error al generar los estilos:', err.message);
   })
-  // .pipe(rename({ suffix: '.min' })) // renombrar antes de escribir sourcemaps
-  // .pipe(sourcemaps.write('.'))
   .pipe(dest('build/js'));
 }
 
 function generateJSmini() {
+  // crear JS minificado
   ensureFolder('src/js', 'carpeta de scripts JS');
   return src(paths.js)
   .pipe(sourcemaps.init())
@@ -222,6 +228,12 @@ function watchFiles() {
 }
 
 console.log('🚀 Iniciando build...');
-export default parallel(cleanBuild, buildStyles, 
-  buildStylesMini, generateJS, generateJSmini, 
-  resizeImagesForWebWithSharp, convertImagesToWebp, watchFiles);
+
+const buildCSS = series(cleanCSS, buildStyles, buildStylesMini);
+const buildImages = parallel(resizeImagesForWebWithSharp, convertImagesToWebp);
+export const buildJS = series(cleanJS, generateJS, generateJSmini);
+
+export default parallel(buildCSS, buildJS, buildImages, watchFiles);
+
+
+
