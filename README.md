@@ -149,6 +149,7 @@ export default parallel(
   generateJS, 
   generateJSmini, 
   resizeImagesWithSharp,
+  convertImagesToWebp,
    watchFiles
 );
 
