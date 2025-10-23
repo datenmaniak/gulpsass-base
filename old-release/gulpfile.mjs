@@ -26,9 +26,6 @@ import sharp from 'sharp';
 
 import {deleteAsync} from 'del';
 
-// evitar que errores detengan el watcher
-import plumber from 'gulp-plumber';
-
 const paths = {
   scss: 'src/scss/**/*.scss',
   js: 'src/js/**/*.js',
@@ -63,39 +60,29 @@ export function cleanJS() {
 function buildStyles() {
   ensureFolder('src/scss', 'carpeta SCSS');
   return src(paths.scss)
-    .pipe(plumber({ errorHandler: err => {
-      console.error('[buildStyles] ❌ Error:', err.message);
-    }}))
     .pipe(sourcemaps.init())  // a partir de aqui, compruebo  #1
-    .pipe(sass())
-    // .on('error', err => { // function compile de Dart Sass
-    //   console.error('[buildStyles] ❌ Error al compilar:', err.message);
-    // }))
+    .pipe(sass()
+    .on('error', err => { // function compile de Dart Sass
+      console.error('❌ Error al compilar:', err.message);
+    }))
     .pipe(postcss([autoprefixer()]))   // #2
-    // .pipe(sourcemaps.write('.')) // ⬅️ Escribe el sourcemap junto al CSS
     // .on('error', sass.logError))
-    .pipe(dest('build/css'))
-    .on('end', () => {
-      console.log('\x1b[35m[Violet Pulse] ✅ SCSS compilado correctamente.\x1b[0m');
-    });
+    .pipe(dest('build/css'));
 };
 
 
 function buildStylesMini() {
   ensureFolder('src/scss', 'carpeta SCSS');
   return src(paths.scss)
-    .pipe(plumber({ errorHandler: err => {
-        console.error('[buildStylesMini] ❌ Error:', err.message);
-      }}))
     .pipe(sourcemaps.init())
-    .pipe(sass())
+    .pipe(sass()
+    .on('error', err => { // function compile de Dart Sass
+      console.error('[buildStylesMini] ❌ Error al compilar SCSS ', err.message);
+    }))
     .pipe(postcss([autoprefixer(), cssnano()]))
     .pipe(rename({ suffix: '.min' }))
-    // .pipe(sourcemaps.write('.'))
-    .pipe(dest('build/css'))
-     .on('end', () => {
-      console.log('\x1b[35m[Violet Pulse] ✅ SCSS minificado compilado correctamente.\x1b[0m');
-    });
+    .pipe(sourcemaps.write('.'))
+    .pipe(dest('build/css'));
 }
 
 function generateJS() {
@@ -103,15 +90,12 @@ function generateJS() {
   ensureFolder('src/js', 'carpeta de scripts JS');
   return src(paths.js)
   .pipe(sourcemaps.init())
-  // .pipe(terser({ format: { beautify: true } }))  // no indentar
+  .pipe(terser({ format: { beautify: true } }))
   .pipe(concat('bundle.js')) // nombre legible sin .min
   .on('error', err => {
     console.error('[generateJS] ❌ Error al generar los estilos:', err.message);
   })
-  .pipe(dest('build/js'))
-   .on('end', () => {
-      console.log('\x1b[35m[Violet Pulse] ✅ JS script compilado correctamente.\x1b[0m');
-    });
+  .pipe(dest('build/js'));
 }
 
 function generateJSmini() {
@@ -126,10 +110,7 @@ function generateJSmini() {
   })
   .pipe(rename({ suffix: '.min' })) // renombrar antes de escribir sourcemaps
   .pipe(sourcemaps.write('.'))
-  .pipe(dest('build/js'))
-   .on('end', () => {
-      console.log('\x1b[35m[Violet Pulse] ✅ JS minificado compilado correctamente.\x1b[0m');
-    });
+  .pipe(dest('build/js'));
 }
 
 // function optimizeImages() {
@@ -190,8 +171,7 @@ function resizeImagesForWebWithSharp(done) {
           // .toFile(`${outputDir}/${base}${size.suffix}${ext}`)
           .toFile(`${outputDir}/${base}${ext}`)
           .then(() => {
-            console.log(` ✅   ${file} → ${base}${size.suffix}${ext}  `, 
-              '\x1b[35m Imagen optimizada correctamente.\x1b[0m');
+            console.log(`✅ ${file} → ${base}${size.suffix}${ext}`);
           })
           .catch(err => {
             console.error(`❌ Error al redimensionar ${file}:`, err.message);
@@ -226,9 +206,7 @@ function convertImagesToWebp(done) {
         .toFormat('webp')
         .toFile(`${outputDir}/${base}.webp`)
         .then(() => {
-           console.log(` ✅   ${file} → ${base}.webp `, 
-              '\x1b[35m Imagen Webp generada correctamente.\x1b[0m');
-          // console.log(`✅ ${file} → ${base}.webp`);
+          console.log(`✅ ${file} → ${base}.webp`);
         })
         .catch(err => {
           console.error(`❌ Error al convertir ${file} a WebP:`, err.message);
@@ -241,19 +219,13 @@ function convertImagesToWebp(done) {
 
 
 
-// function watchFiles() {
-//   watch(paths.scss, buildStyles);
-//   watch(paths.js, generateJS);
-//   // watch(paths.images, optimizeImages);
-//   watch(paths.images, resizeImagesForWebWithSharp);
-//   watch(paths.images, convertImagesToWebp);
-// }
 function watchFiles() {
-  watch(paths.scss, series(buildStyles, buildStylesMini));
-  watch(paths.js, series(generateJS, generateJSmini));
-  watch(paths.images, series(resizeImagesForWebWithSharp, convertImagesToWebp));
+  watch(paths.scss, buildStyles);
+  watch(paths.js, generateJS);
+  // watch(paths.images, optimizeImages);
+  watch(paths.images, resizeImagesForWebWithSharp);
+  watch(paths.images, convertImagesToWebp);
 }
-
 
 console.log('🚀 Iniciando build...');
 

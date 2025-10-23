@@ -206,3 +206,74 @@ Datenmaniak — IT Freelancer, diseñador web modular, creador del ecosistema Vi
 ```
 
 > Esto sobrescribirá cualquier archivo existente con el mismo nombre en `build/img`, por lo que se recomienda usar una carpeta dedicada si deseas conservar el original.
+
+
+# 🛠️ Documentación Técnica - Gulpfile Optimizado 
+
+Este documento describe todas las tareas definidas en el `gulpfile.mjs`, junto con las mejoras aplicadas para robustez, reactividad y modularidad. Está diseñado para facilitar el onboarding técnico y mantener coherencia con la identidad de marca Violet Pulse.
+
+---
+
+## ✨ Mejoras Aplicadas
+
+### 🔁 Watcher Reactivo
+
+- Se corrigió el watcher para detectar cambios en archivos parciales SCSS (`_*.scss`)
+- Se encadenaron tareas con `series()` para recompilar versiones normal y minificada
+- Se eliminaron reinicios manuales de `npm run dev`
+
+```js
+watch(['src/scss/**/*.scss', 'src/scss/**/_*.scss'], series(buildStyles, buildStylesMini));
+```
+
+##  Estructura de Carpetas
+```
+src/scss/ → Archivos fuente SCSS
+
+src/js/ → Scripts fuente JS
+
+src/img/ → Imágenes fuente
+
+build/css/ → CSS compilado y minificado
+
+build/js/ → JS legible y minificado
+
+build/img/ → Imágenes redimensionadas y convertidas a WebP
+```
+
+## 📋 Tabla de Tareas Gulp - Violet Pulse
+
+| Tarea                      | Propósito                                                  | Mejoras Aplicadas                                      | Notas Relevantes                                  |
+|---------------------------|-------------------------------------------------------------|--------------------------------------------------------|--------------------------------------------------|
+| `cleanCSS`                | Elimina archivos en `build/css`                             | Uso de `deleteAsync`                                   | Limpieza previa a compilación                    |
+| `cleanJS`                 | Elimina JS y sourcemaps en `build/js`                       | Uso de `deleteAsync`                                   | Evita residuos de versiones anteriores           |
+| `buildStyles`             | Compila SCSS con sourcemaps y autoprefixer                  | `gulp-plumber`, log Violet Pulse, cierre de `sass()`   | Requiere `src/scss/**/*.scss`                    |
+| `buildStylesMini`         | Compila y minifica SCSS con `cssnano`                       | `gulp-plumber`, log Violet Pulse, cierre de `sass()`   | Renombra con `.min`                              |
+| `generateJS`              | Concatena y genera JS legible                               | Sourcemaps, log Violet Pulse                           | Usa `concat('bundle.js')`                        |
+| `generateJSmini`          | Minifica JS y renombra con `.min`                           | Sourcemaps, log Violet Pulse                           | Usa `terser()` y `rename()`                      |
+| `resizeImagesForWebWithSharp` | Redimensiona imágenes a 480px                             | Uso directo de `sharp`, verificación de carpetas       | Preserva nombre original                         |
+| `convertImagesToWebp`     | Convierte imágenes a formato WebP                           | Uso directo de `sharp`, verificación de carpetas       | Aplica resize antes de conversión                |
+| `watchFiles`              | Observa cambios en SCSS, JS e imágenes                      | Encadenamiento con `series()`, rutas parciales SCSS    | Evita reinicios manuales                         |
+| `buildCSS`                | Limpia y compila SCSS (normal + minificado)                 | Encadenamiento con `series()`                          | Se usa en `default`                              |
+| `buildJS`                 | Limpia y compila JS (normal + minificado)                   | Encadenamiento con `series()`                          | Se exporta como tarea individual                 |
+| `buildImages`             | Redimensiona y convierte imágenes                           | Uso de `parallel()`                                    | Se usa en `default`                              |
+| `default`                 | Ejecuta todas las tareas y activa el watcher                | Uso de `parallel()`, incluye `watchFiles`              | Se ejecuta con `npm run dev`                     |
+
+
+## 📌 Recomendaciones futuras
+ + Agregar notificaciones visuales (ej. node-notifier)
+
++ Generar logs con timestamp por tarea
+
++ Modularizar tareas en archivos separados (tasks/styles.js, tasks/scripts.js, etc.)
+
++ Documentar dependencias en README.md 
+
+
+
+
+## ⚠️ **Nota sobre versiones del Gulpfile**
+>
+> Para propósitos de ensayo y como medida de respaldo ante posibles errores en esta nueva versión optimizada, se conservará el `gulpfile.mjs` anterior completamente funcional. Esta versión ha sido movida al directorio `old-release/`, donde permanecerá disponible para comparación, validación de mejoras y reversión temporal si fuese necesario.
+>
+> Ambas versiones pueden coexistir en el proyecto, diferenciadas por nombre o ubicación, hasta que se confirme la estabilidad total del flujo optimizado.
