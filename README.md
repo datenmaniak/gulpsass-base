@@ -179,22 +179,6 @@ build/img/
 ├── central.webp
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-# 🧑‍💻 Autor
-Datenmaniak — IT Freelancer, diseñador web modular, creador del ecosistema Violet Pulse.
-
-
-
 > ℹ️ **Nota:** Para más información sobre las dependencias necesarias, consulta el archivo `package.json`. Allí se definen todos los paquetes requeridos para ejecutar esta función, incluyendo `sharp` y otras utilidades del entorno Gulp. Al ejecutar `npm install`, se instalarán automáticamente.
 
 > 🛠️ **Nota técnica:** Si deseas generar únicamente una versión redimensionada a 480px y conservar el nombre original del archivo (sin sufijos como `-sm`, `-md`, `-lg`), puedes ajustar la función eliminando el bucle de tamaños y modificando la línea `.toFile()` para que use directamente el nombre base:
@@ -277,3 +261,10 @@ build/img/ → Imágenes redimensionadas y convertidas a WebP
 > Para propósitos de ensayo y como medida de respaldo ante posibles errores en esta nueva versión optimizada, se conservará el `gulpfile.mjs` anterior completamente funcional. Esta versión ha sido movida al directorio `old-release/`, donde permanecerá disponible para comparación, validación de mejoras y reversión temporal si fuese necesario.
 >
 > Ambas versiones pueden coexistir en el proyecto, diferenciadas por nombre o ubicación, hasta que se confirme la estabilidad total del flujo optimizado.
+
+
+
+
+
+# 🧑‍💻 Autor
+Datenmaniak — IT Freelancer, diseñador web modular, creador del ecosistema Violet Pulse.
